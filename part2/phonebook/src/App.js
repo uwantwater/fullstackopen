@@ -28,12 +28,12 @@ const Filter = ({ persons }) => {
     const regex = new RegExp(search, 'i')
     const filtering = persons.filter((person) => regex.test(person.name))
     setNewMatches(filtering)   
-  }  
+  }
   return (
     <>
       <div>filter shown with: <input onChange={handleSearchTerm}/></div>
       <div>
-        {matches.map((match) => <p key={match.id}>{match.name} {match.number}</p>)}
+        {matches.map((match, i) => <p key={i}>{match.name} {match.number}</p>)}
       </div>
     </>
   )
@@ -42,7 +42,7 @@ const Filter = ({ persons }) => {
 const Persons = ({ persons }) => {
   return (
     <>
-      {persons.map((person, i) => <p key={i}>{person.name} {person.number}</p>)}
+      {persons.map((person) => <p key={person.id}>{person.name} {person.number}</p>)}
     </>
   )
 }
