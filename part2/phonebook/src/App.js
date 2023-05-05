@@ -59,7 +59,7 @@ const App = () => {
       console.log('promise fulfilled')
       setPersons(response.data)
     })
-  })
+  }, [])
 
   const listOfPersons = persons.map(person => person.name)
   
