@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import axios from 'axios'
+import personsService from './services/persons'
 
 const AddNew = ({ onSub, onChName, onChNum }) => {
   return (
@@ -40,11 +40,11 @@ const Filter = ({ persons }) => {
   )
 }
 
-const Persons = ({ persons }) => {
+const Person = ({ person, toggleDelete }) => {
   return (
-    <>
-      {persons.map((person) => <p key={person.id}>{person.name} {person.number}</p>)}
-    </>
+    <p key={person.id}>
+      {person.name} {person.number} <button onClick={toggleDelete}>delete</button>
+    </p>
   )
 }
 
@@ -53,12 +53,9 @@ const App = () => {
   const [persons, setPersons] = useState([])
 
   useEffect(() => {
-    axios
-    .get('http://localhost:3001/persons')
-    .then(response => {
-      console.log('promise fulfilled')
-      setPersons(response.data)
-    })
+    personsService
+      .getAll()
+      .then(initialList => setPersons(initialList))
   }, [])
 
   const listOfPersons = persons.map(person => person.name)
@@ -69,7 +66,13 @@ const App = () => {
   const addPerson = (event) => {
     event.preventDefault()
     if (listOfPersons.includes(newName)) {
-      alert(`${newName} is already added to phonebook`)
+      if (window.confirm(`${newName} is already added to phonebook, replace the old number with the new one?`)) {
+        const reqId = listOfPersons.findIndex(i => i === newName) + 1
+        personsService.update(reqId, {name: newName,
+                                      number: newNum,
+                                      id: reqId})
+          .then(updatedPersons => setPersons(updatedPersons))
+      }
     }
     else {
       const personObject = {
@@ -77,10 +80,9 @@ const App = () => {
          number: newNum,
          id: persons.length + 1 
         }
-      setPersons(persons.concat(personObject))
-      axios
-        .post('http://localhost:3001/persons', personObject)
-        .then(response => console.log(response))
+      personsService
+        .create(personObject)
+        .then(newPerson => setPersons(persons.concat(newPerson)))
     }
   }
 
@@ -90,15 +92,22 @@ const App = () => {
   const handleNewNum = (event) => {
     setNewNum(event.target.value)
   }
+  const toggleDelete = (id) => {
+    if (window.confirm(`Delete ${persons[id - 1].name}?`)) {
+      personsService
+        .remove(id)
+        .then(updatedPersons => setPersons(updatedPersons))
+      }
+  }
 
   return (
     <div>
       <h2>Phonebook</h2>
-      <Filter persons={persons}/>
-      <AddNew onSub={addPerson} onChName={handleNewName} onChNum={handleNewNum}/>
+      <Filter persons={persons} />
+      <AddNew onSub={addPerson} onChName={handleNewName} onChNum={handleNewNum} />
       <h3>Numbers</h3>
       <div>
-        <Persons persons={persons}/>
+        {persons.map(person => <Person person={person} toggleDelete={() => toggleDelete(person.id)} key={person.id}/>)}
       </div>
     </div>
   )
