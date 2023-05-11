@@ -1,5 +1,17 @@
 import { useState, useEffect } from 'react'
 import personsService from './services/persons'
+import './index.css'
+
+const Notification = ({ message, status }) => {
+  if (message === null) {
+    return null
+  }
+  return (
+    <div className={status[0] === 'success' ? 'success' : 'error'}>
+      {message}
+    </div>
+  )
+}
 
 const AddNew = ({ onSub, onChName, onChNum }) => {
   return (
@@ -62,6 +74,8 @@ const App = () => {
   
   const [newName, setNewName] = useState([''])
   const [newNum, setNewNum] = useState([''])
+  const [newNotif, setNewNotif] = useState(['notification...'])
+  const [notifStatus, setnotifStatus] = useState(['success'])
 
   const addPerson = (event) => {
     event.preventDefault()
@@ -103,6 +117,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Notification message={newNotif} status={notifStatus} />
       <Filter persons={persons} />
       <AddNew onSub={addPerson} onChName={handleNewName} onChNum={handleNewNum} />
       <h3>Numbers</h3>
